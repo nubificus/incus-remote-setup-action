@@ -1,0 +1,29 @@
+name: 'Incus Remote Setup Action'
+description: 'Sets up Incus by adding the repository, installing the client, and connecting to a remote Incus server'
+author: 'Nubificus LTD'
+branding:
+  icon: 'box'
+  color: 'blue'
+
+inputs:
+  ssh_user:
+    description: 'SSH user for authenticating to the remote Incus server'
+    required: true
+  ssh_key:
+    description: 'SSH private key for authenticating to the remote Incus server'
+    required: true
+  remote_host:
+    description: 'Remote Incus server IP or hostname'
+    required: true
+  friendly_name:
+    description: 'Friendly name for the Incus remote'
+    required: true
+  incus_version:
+    description: 'Version of Incus to install (default: v6.10.1)'
+    required: false
+    default: 'v6.10.1'
+
+runs:
+  using: 'node20'
+  main: 'src/install.js'
+  post: 'src/cleanup.js'
