@@ -57,12 +57,19 @@ Signed-By: /etc/apt/keyrings/zabbly.asc`;
 
     let incus_token = get_token.trim();
     incus_token = incus_token.replace(/[\r\n]+/g, '');
-    console.log(`incus_token=${incus_token}`);
 
     setOutput('incus_token', incus_token);
 
-    // add remote
+    // Create incus config directory
     const friendly_name = getInput('friendly_name');
+    const user = execSync('whoami', { encoding: 'utf-8', stdio: 'pipe' }).trim();
+    execSync(`sudo mkdir -p /home/${user}/.config/incus`, { encoding: 'utf-8', stdio: 'inherit' });
+    execSync(`sudo chown -R ${user}:${user} /home/${user}/.config/incus`, { encoding: 'utf-8', stdio: 'inherit' });
+    execSync(`sudo chmod 700 /home/${user}/.config/incus`, { encoding: 'utf-8', stdio: 'inherit' });
+
+    console.log(`successfully created /home/${user}/.config/incus`);
+
+    // Add remote
     execSync(`incus remote add ${friendly_name} https://${remote_host}:8443 --accept-certificate --auth-type tls --token ${incus_token}`, { encoding: 'utf-8', stdio: 'inherit' });
 } catch (error) {
     setFailed(error.message);

@@ -1,8 +1,6 @@
 const { execSync } = require('child_process');
 const { getInput, setFailed } = require('@actions/core');
 
-
-
 try {
     // remove incus fingerprints
     const ssh_user = getInput('ssh_user');
@@ -15,7 +13,7 @@ try {
     }
 
     // uninstall incus
-    execSync('sudo apt remove -y incus-client', { encoding: 'utf-8', stdio: 'inherit' });
+    execSync('sudo apt-get remove --auto-remove -y incus-client', { encoding: 'utf-8', stdio: 'inherit' });
 
     // remove apt repository
     execSync('sudo rm -f /etc/apt/sources.list.d/zabbly-incus-stable.sources', { encoding: 'utf-8', stdio: 'inherit' });
