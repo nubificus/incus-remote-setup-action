@@ -63,7 +63,7 @@ Signed-By: /etc/apt/keyrings/zabbly.asc`;
 
     // add remote
     const friendly_name = getInput('friendly_name');
-    execSync(`sudo incus remote add ${friendly_name} https://${remote_host}:8443 --accept-certificate --auth-type tls --token ${incus_token}`, { encoding: 'utf-8', stdio: 'inherit' });
+    execSync(`incus remote add ${friendly_name} https://${remote_host}:8443 --accept-certificate --auth-type tls --token ${incus_token}`, { encoding: 'utf-8', stdio: 'inherit' });
 } catch (error) {
     setFailed(error.message);
 }
