@@ -12,12 +12,15 @@ try {
         execSync(`ssh -i ~/.ssh/id_rsa ${ssh_user}@${remote_host} "incus config trust remove ${fingerprint}"`, { encoding: 'utf-8', stdio: 'inherit' });
     }
 
-    // uninstall incus
-    execSync('sudo apt-get remove --auto-remove -y incus-client', { encoding: 'utf-8', stdio: 'inherit' });
+    const cleanup = getInput('cleanup');
+    if (cleanup === 'true') {
+        // uninstall incus
+        execSync('sudo apt-get remove --auto-remove -y incus-client', { encoding: 'utf-8', stdio: 'inherit' });
 
-    // remove apt repository
-    execSync('sudo rm -f /etc/apt/sources.list.d/zabbly-incus-stable.sources', { encoding: 'utf-8', stdio: 'inherit' });
-    execSync('sudo rm -f /etc/apt/keyrings/zabbly.asc', { encoding: 'utf-8', stdio: 'inherit' });
+        // remove apt repository
+        execSync('sudo rm -f /etc/apt/sources.list.d/zabbly-incus-stable.sources', { encoding: 'utf-8', stdio: 'inherit' });
+        execSync('sudo rm -f /etc/apt/keyrings/zabbly.asc', { encoding: 'utf-8', stdio: 'inherit' });
+    }
 
 } catch (error) {
     // log the error

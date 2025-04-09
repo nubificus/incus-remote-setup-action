@@ -18,6 +18,10 @@ inputs:
   friendly_name:
     description: 'Friendly name for the Incus remote'
     required: true
+  cleanup:
+    description: 'Whether we should clean up the runner from Incus'
+    required: false
+    default: 'true'
   incus_version:
     description: 'Version of Incus to install (default: v6.10.1)'
     required: false
