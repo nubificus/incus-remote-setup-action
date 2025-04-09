@@ -38,6 +38,7 @@ Signed-By: /etc/apt/keyrings/zabbly.asc`;
     // configure ssh for incus
     const ssh_key = getInput('ssh_key');
     const remote_host = getInput('remote_host');
+    const incus_client_name = getInput('incus_client_name');
     console.log(`ssh_key=${ssh_key}`);
 
     // save SSH key to ~/.ssh using nodejs
@@ -53,7 +54,7 @@ Signed-By: /etc/apt/keyrings/zabbly.asc`;
 
     // get incus token
     const ssh_user = getInput('ssh_user');
-    const get_token = execSync(`ssh -i ~/.ssh/id_rsa ${ssh_user}@${remote_host} "incus config trust add gh-action" | grep -v 'Client gh-action certificate add token:'`, { encoding: 'utf-8', stdio: 'pipe' });
+    const get_token = execSync(`ssh -i ~/.ssh/id_rsa ${ssh_user}@${remote_host} "incus config trust add ${incus_client_name}" | grep -v 'Client ${incus_client_name} certificate add token:'`, { encoding: 'utf-8', stdio: 'pipe' });
 
     let incus_token = get_token.trim();
     incus_token = incus_token.replace(/[\r\n]+/g, '');
