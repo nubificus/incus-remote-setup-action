@@ -16,11 +16,7 @@ try {
     const cleanup = getInput('cleanup');
     if (cleanup === 'true') {
         // uninstall incus
-        execSync('sudo apt-get remove --auto-remove -y incus-client', { encoding: 'utf-8', stdio: 'inherit' });
-
-        // remove apt repository
-        execSync('sudo rm -f /etc/apt/sources.list.d/zabbly-incus-stable.sources', { encoding: 'utf-8', stdio: 'inherit' });
-        execSync('sudo rm -f /etc/apt/keyrings/zabbly.asc', { encoding: 'utf-8', stdio: 'inherit' });
+        execSync('sudo rm -f /usr/local/bin/incus', { encoding: 'utf-8', stdio: 'inherit' });
     }
 
 } catch (error) {
