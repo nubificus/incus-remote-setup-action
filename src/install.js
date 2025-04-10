@@ -2,39 +2,23 @@ const os = require('os');
 const { execSync } = require('child_process');
 const { getInput, setFailed, setOutput } = require('@actions/core');
 const fs = require('fs');
+const { get } = require('https');
 try {
     // install curl and ssh
     execSync('sudo apt-get update && sudo apt-get install -y curl ssh', { encoding: 'utf-8', stdio: 'inherit' });
     console.log(`successfully installed curl and ssh`);
 
     // add incus repository
-    execSync(`sudo mkdir -p /etc/apt/keyrings/`, { encoding: 'utf-8', stdio: 'inherit' });
-    console.log(`successfully created /etc/apt/keyrings/`);
-    execSync(`sudo curl -fsSL https://pkgs.zabbly.com/key.asc -o /etc/apt/keyrings/zabbly.asc`, { encoding: 'utf-8', stdio: 'inherit' });
-    console.log(`successfully added zabbly key`);
+    const architecture = execSync('uname -m', { encoding: 'utf-8', stdio: 'pipe' }).trim();
+    const incus_version = getInput('incus_version');
+    console.log(`incus_version=${incus_version}`);
+    console.log(`architecture=${architecture}`);
 
-    // add incus repository using nodejs
-
-    const VERSION_CODENAME = execSync('lsb_release -cs', { encoding: 'utf-8', stdio: 'pipe' }).trim();
-    console.log(`VERSION_CODENAME=${VERSION_CODENAME}`);
-    const Architectures = execSync('dpkg --print-architecture', { encoding: 'utf-8', stdio: 'pipe' }).trim();
-    console.log(`Architectures=${Architectures}`);
-
-
-    const sourcesContent = `Enabled: yes
-Types: deb
-URIs: https://pkgs.zabbly.com/incus/stable
-Suites: $(. /etc/os-release && echo ${VERSION_CODENAME})
-Components: main
-Architectures: ${Architectures}
-Signed-By: /etc/apt/keyrings/zabbly.asc`;
-    execSync(`echo "${sourcesContent}" | sudo tee /etc/apt/sources.list.d/zabbly-incus-stable.sources`, { encoding: 'utf-8', stdio: 'inherit' });
-    console.log(`sourcesContent=${sourcesContent}`);
-    console.log(`successfully added zabbly repository`);
-    // install incus
-    execSync('sudo apt-get update && sudo apt-get install -y incus-client', { encoding: 'utf-8', stdio: 'inherit' });
-    console.log(`successfully installed incus`);
-
+    const releaseUrl =`https://github.com/lxc/incus/releases/download/${incus_version}/bin.linux.incus.${architecture}`;
+    execSync(`sudo curl -Lo /usr/local/bin/incus ${releaseUrl}`, { encoding: 'utf-8', stdio: 'inherit' });
+    execSync(`sudo chmod +x /usr/local/bin/incus`, { encoding: 'utf-8', stdio: 'inherit' });
+    console.log(`successfully installed incus executable`);
+   
     // configure ssh for incus
     const ssh_key = getInput('ssh_key');
     const remote_host = getInput('remote_host');
