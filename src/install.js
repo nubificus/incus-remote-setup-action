@@ -4,9 +4,20 @@ const { getInput, setFailed, setOutput } = require('@actions/core');
 const fs = require('fs');
 const { get } = require('https');
 try {
-    // install curl and ssh
-    execSync('sudo apt-get update && sudo apt-get install -y curl ssh', { encoding: 'utf-8', stdio: 'inherit' });
-    console.log(`successfully installed curl and ssh`);
+    const missingPackages = [];
+    if (!isCommandAvailable('curl')) {
+        missingPackages.push('curl');
+    }
+    if (!isCommandAvailable('ssh')) {
+        missingPackages.push('openssh-client');
+    }
+    if (missingPackages.length > 0) {
+        console.log(`Installing missing packages: ${missingPackages.join(', ')}`);
+        execSync(`sudo apt-get update && sudo apt-get install -y ${missingPackages.join(' ')}`, { encoding: 'utf-8', stdio: 'inherit' });
+        console.log(`Successfully installed: ${missingPackages.join(', ')}`);
+    } else {
+        console.log(`curl and ssh already available`);
+    }
 
     // add incus repository
     const architecture = execSync('uname -m', { encoding: 'utf-8', stdio: 'pipe' }).trim();
@@ -14,11 +25,11 @@ try {
     console.log(`incus_version=${incus_version}`);
     console.log(`architecture=${architecture}`);
 
-    const releaseUrl =`https://github.com/lxc/incus/releases/download/${incus_version}/bin.linux.incus.${architecture}`;
+    const releaseUrl = `https://github.com/lxc/incus/releases/download/${incus_version}/bin.linux.incus.${architecture}`;
     execSync(`sudo curl -Lo /usr/local/bin/incus ${releaseUrl}`, { encoding: 'utf-8', stdio: 'inherit' });
     execSync(`sudo chmod +x /usr/local/bin/incus`, { encoding: 'utf-8', stdio: 'inherit' });
     console.log(`successfully installed incus executable`);
-   
+
     // configure ssh for incus
     const ssh_key = getInput('ssh_key');
     const remote_host = getInput('remote_host');
@@ -58,4 +69,13 @@ try {
     execSync(`incus remote add ${friendly_name} https://${remote_host}:8443 --accept-certificate --auth-type tls --token ${incus_token}`, { encoding: 'utf-8', stdio: 'inherit' });
 } catch (error) {
     setFailed(error.message);
+}
+
+function isCommandAvailable(cmd) {
+    try {
+        execSync(`command -v ${cmd}`, { stdio: 'ignore' });
+        return true;
+    } catch {
+        return false;
+    }
 }
